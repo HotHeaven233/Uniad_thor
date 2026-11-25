@@ -156,3 +156,45 @@ mmcv
 
 # vscode config file
 .vscode/
+# =========================
+# UniAD Thor local data
+# =========================
+
+# NuScenes dataset
+/data/
+
+# Model checkpoints
+/ckpts/
+*.pth
+*.pt
+*.ckpt
+
+# Inference outputs
+/outputs/
+/work_dirs/
+/test/
+
+# Logs
+*.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Local cache
+.cache/
+
+# Local credentials
+.env
+.env.*
+
+# Local backup files
+*.bak
+*.before_*
+*.pre_*

@@ -7,9 +7,46 @@
 from typing import Optional
 
 import torch
-from pytorch_lightning.metrics.metric import Metric
-from pytorch_lightning.metrics.functional.classification import stat_scores_multiple_classes
-from pytorch_lightning.metrics.functional.reduction import reduce
+from torchmetrics import Metric
+
+
+def stat_scores_multiple_classes(prediction, target, num_classes):
+    """Calculate one-vs-rest statistics for each class."""
+    prediction = prediction.reshape(-1).long()
+    target = target.reshape(-1).long()
+
+    tps, fps, tns, fns, sups = [], [], [], [], []
+
+    for cls in range(num_classes):
+        pred_pos = prediction == cls
+        target_pos = target == cls
+
+        tp = (pred_pos & target_pos).sum()
+        fp = (pred_pos & ~target_pos).sum()
+        fn = (~pred_pos & target_pos).sum()
+        tn = (~pred_pos & ~target_pos).sum()
+        sup = target_pos.sum()
+
+        tps.append(tp)
+        fps.append(fp)
+        tns.append(tn)
+        fns.append(fn)
+        sups.append(sup)
+
+    return tuple(
+        torch.stack(x).float()
+        for x in (tps, fps, tns, fns, sups)
+    )
+
+
+def reduce(scores, reduction="none"):
+    if reduction == "none":
+        return scores
+    if reduction == "sum":
+        return scores.sum()
+    if reduction in ("mean", "elementwise_mean"):
+        return scores.mean()
+    raise ValueError(f"Unsupported reduction: {reduction}")
 
 class IntersectionOverUnion(Metric):
     """Computes intersection-over-union."""
@@ -21,7 +58,7 @@ class IntersectionOverUnion(Metric):
         reduction: str = 'none',
         compute_on_step: bool = False,
     ):
-        super().__init__(compute_on_step=compute_on_step)
+        super().__init__()
 
         self.n_classes = n_classes
         self.ignore_index = ignore_index
@@ -78,7 +115,7 @@ class PanopticMetric(Metric):
         vehicles_id: int = 1,
         compute_on_step: bool = False,
     ):
-        super().__init__(compute_on_step=compute_on_step)
+        super().__init__()
 
         self.n_classes = n_classes
         self.temporally_consistent = temporally_consistent

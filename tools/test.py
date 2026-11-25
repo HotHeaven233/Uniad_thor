@@ -1,6 +1,16 @@
 import argparse
 import cv2
+
+# Reduce the risk of fork/thread deadlocks.
+cv2.setNumThreads(0)
+cv2.ocl.setUseOpenCL(False)
 import torch
+
+torch.backends.cudnn.allow_tf32 = True
+print("[PRECISION-CHECK]", torch.backends.cuda.matmul.allow_tf32, torch.backends.cudnn.allow_tf32, flush=True)
+
+# Enable TF32 Tensor Core acceleration on NVIDIA GPUs
+torch.backends.cuda.matmul.allow_tf32 = True
 import sklearn
 import mmcv
 import os
@@ -195,6 +205,10 @@ def main():
         dist=distributed,
         shuffle=False,
         nonshuffler_sampler=cfg.data.nonshuffler_sampler,
+        **(
+            dict(timeout=90, prefetch_factor=1)
+            if cfg.data.workers_per_gpu > 0 else {}
+        )
     )
 
     # build the model and load checkpoint
