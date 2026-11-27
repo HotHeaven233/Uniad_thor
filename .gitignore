@@ -136,7 +136,6 @@ dmypy.json
 
 # output & ckpts
 output/
-test/
 ckpts/
 ckpts
 
@@ -198,3 +197,34 @@ venv/
 *.bak
 *.before_*
 *.pre_*
+
+# ==============================
+# Large datasets and model weights
+# ==============================
+
+# Datasets
+data/
+datasets/
+nuscenes/
+
+# Model checkpoints and weights
+ckpts/
+checkpoints/
+weights/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.engine
+
+# Generated experiment outputs
+work_dirs/
+outputs/
+logs/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Runtime logs
+*.log
